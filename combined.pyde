@@ -1,7 +1,8 @@
-# add_library("minim")
+add_library("minim")
 import os, random
 
 path = os.getcwd()
+player = Minim(this)
 
 RES_W = 1200
 RES_H = 700
@@ -30,7 +31,9 @@ class Player:
         self.attacking = False # to know if the player is attacking or not
         self.attack_type = {'punch': False, 'kick':False, 'special_move': False} # y = Punch, h = Kick, g = Special Move
         self.hit = False # To know if the target was hit or not
-        self.wins_num = wins_num 
+        self.wins_num = wins_num
+        self.getting_hit_sound = player.loadFile(path+"/sounds/getting_hit.mp3")
+          
         # Initial direction
         if self.player_num == 0:
             self.p_direction = 'right'
@@ -63,6 +66,7 @@ class Player:
             self.scl_factor = 3
             # Check if this character is in IDLE state
             if not self.alive:
+                print('iii')
                 image(self.sasuke_dead, self.x, self.y, 50*self.scl_factor, 16*self.scl_factor, 0, 0, 50, 16)
             elif self.state['jump']:
                 if self.p_direction == 'right':
@@ -182,6 +186,8 @@ class Player:
                     if (other_player.x+other_player.p_width) - (self.x+self.p_width + 20) <= other_player.p_width and self.x < other_player.x: # checks if other player is within hit area
                     # if (-20 <= ((self.x+self.p_width) - other_player.x) <= 0) and (self.y - other_player.y <= self.p_height):
                         other_player.health -= 10
+                        self.getting_hit_sound.rewind()
+                        self.getting_hit_sound.play()
                         print('hit')
                         self.attacking = False
                 else:
@@ -191,6 +197,8 @@ class Player:
                     if (self.x - 20)  - (other_player.x) <= other_player.p_width and self.x > other_player.x: # checks if other player is within hit area 
                     # if (0 <= (self.x-(other_player.x+self.p_width)) <= 20) and (self.y - other_player.y <= self.p_height):
                         other_player.health -= 10
+                        self.getting_hit_sound.rewind()
+                        self.getting_hit_sound.play()
                         print('hit')
                         self.attacking = False
 
@@ -203,6 +211,8 @@ class Player:
                     print(self.p_direction)
                     if (other_player.x+other_player.p_width) - (self.x+self.p_width + 20) <= other_player.p_width and self.x < other_player.x:
                         other_player.health -= 10
+                        self.getting_hit_sound.rewind()
+                        self.getting_hit_sound.play()
                         print('hit')
                         self.attacking = False
                 else:
@@ -211,6 +221,8 @@ class Player:
                     print(self.p_direction)
                     if (self.x - 20)  - (other_player.x) <= other_player.p_width and self.x > other_player.x:
                         other_player.health -= 10
+                        self.getting_hit_sound.rewind()
+                        self.getting_hit_sound.play()
                         print('hit')
                         self.attacking = False
                         
@@ -222,6 +234,8 @@ class Player:
                     print(self.p_direction)
                     if (other_player.x+other_player.p_width) - (self.x+self.p_width + 20) <= other_player.p_width and self.x < other_player.x:
                         other_player.health -= 20
+                        self.getting_hit_sound.rewind()
+                        self.getting_hit_sound.play()
                         print('hit')
                         self.attacking = False
                 else:
@@ -230,6 +244,8 @@ class Player:
                     # print(self.p_direction)
                     if (self.x - 20)  - (other_player.x) <= other_player.p_width and self.x > other_player.x:
                         other_player.health -= 20
+                        self.getting_hit_sound.rewind()
+                        self.getting_hit_sound.play()
                         print('hit')
                         self.attacking = False
             if other_player.health <= 0:
@@ -295,6 +311,8 @@ class Game:
         self.end_game = False
         self.current_round = 1
         self.time_left = 60
+        self.bg_music = player.loadFile(path +"/sounds/background.mp3")
+        self.bg_music.loop()
     
     def distance(self, first, second):
         return ((first.x - second.x)**2 + (first.y - second.y)**2)**0.5
@@ -367,9 +385,11 @@ class Game:
             self.end_round = True
             self.current_round += 1
             
+            self.player1.alive = True
             self.player1 = Player(0, 200, 200, self.player1.wins_num)
             self.player2 = Player(1, 750, 200, self.player2.wins_num)
-        
+            self.player1.alive = True
+            
         if self.current_round == 6:
             self.end_game = True  
         
