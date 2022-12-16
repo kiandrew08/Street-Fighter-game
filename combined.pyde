@@ -10,7 +10,7 @@ RES_H = 700
 GROUND = 600
 
 P_WIDTH = 100
-P_HEIGHT = 250
+P_HEIGHT = 160
 
 P_HEALTH = 100
 
@@ -33,6 +33,7 @@ class Player:
         self.hit = False # To know if the target was hit or not
         self.wins_num = wins_num
         self.getting_hit_sound = player.loadFile(path+"/sounds/getting_hit.mp3")
+        self.prev_action = 'idle'
           
         # Initial direction
         if self.player_num == 0:
@@ -62,11 +63,14 @@ class Player:
             self.spiderman_dead = loadImage(path + '/assets/spiderman/spiderman_dead.png')
     
     def showSprite(self):
-        if self.char_name == 'sasuke':
+        print("this is showing sprite inside fxn")
+        print(self.char_name)
+        if self.char_name == 'sasuke' or self.char_name == 0:
             self.scl_factor = 3
             # Check if this character is in IDLE state
             if not self.alive:
-                print('iii')
+                for i in range(10):
+                    print('iii')
                 image(self.sasuke_dead, self.x, self.y, 50*self.scl_factor, 16*self.scl_factor, 0, 0, 50, 16)
             elif self.state['jump']:
                 if self.p_direction == 'right':
@@ -295,6 +299,7 @@ class Player:
         self.y += self.vy
     
     def display(self, other_player):
+        # print("this is checking inside the display fxn")
         self.showSprite()
         self.attack(other_player)
         self.update()
@@ -313,6 +318,7 @@ class Game:
         self.time_left = 60
         self.bg_music = player.loadFile(path +"/sounds/background.mp3")
         self.bg_music.loop()
+        self.bg_img = loadImage(path+"/assets/background.png")
     
     def distance(self, first, second):
         return ((first.x - second.x)**2 + (first.y - second.y)**2)**0.5
@@ -323,16 +329,15 @@ class Game:
         text_time = str(self.time_left)
         fill(0,0,0)
         text(text_time, 580, 55)
-        print("time printed")
-        print(self.play_ongoing)
+        # print(self.play_ongoing)
         if self.play_ongoing:
             elapsed_time = millis()
-            print("this is elapsed time", elapsed_time)
+            # print("this is elapsed time", elapsed_time)
             if self.time_left >0 :
                 self.time_left = 60 - elapsed_time // 1000 
     
     def display(self):
-        
+        image(self.bg_img, 0,0, RES_W, RES_H)
         # Display players
         self.player1.display(self.player2)
         self.player2.display(self.player1)
@@ -386,8 +391,8 @@ class Game:
             self.current_round += 1
             
             self.player1.alive = True
-            self.player1 = Player(0, 200, 200, self.player1.wins_num)
-            self.player2 = Player(1, 750, 200, self.player2.wins_num)
+            self.player1 = Player(0, 200, 200, 'sasuke', self.player1.wins_num)
+            self.player2 = Player(1, 750, 200, 'spiderman', self.player2.wins_num)
             self.player1.alive = True
             
         if self.current_round == 6:
@@ -399,7 +404,8 @@ def setup():
     size(RES_W, RES_H)
 
 def draw():
-    background(255,255,255)
+    background(200,255,198)
+    # image(
     if game.end_game == False:
         game.display()
 
@@ -419,6 +425,10 @@ def keyPressed():
         # Setting the player's state to run and canceling idle
         game.player1.state['run'] = True
         game.player1.state['idle'] = False
+        
+        if game.player1.prev_action != 'left':
+            game.player1.slice = 0
+            game.player1.prev_action = 'left'
     elif keyCode == RIGHT:
         game.player1.keyLog['Right'] = True
         game.player1.p_direction = 'right'
@@ -426,6 +436,10 @@ def keyPressed():
         # Setting the player's state to run and canceling idle
         game.player1.state['run'] = True
         game.player1.state['idle'] = False
+        
+        if game.player1.prev_action != 'right':
+            game.player1.slice = 0
+            game.player1.prev_action = 'right'
     elif keyCode == UP:
         game.player1.keyLog['Up'] = True
     
@@ -437,6 +451,10 @@ def keyPressed():
         game.player1.state['punch'] = True
         game.player1.state['idle'] = False
         
+        if game.player1.prev_action != 'punch':
+            game.player1.slice = 0
+            game.player1.prev_action = 'punch'
+        
     elif key == 'k' or key =='K':
         game.player1.attacking = True
         game.player1.attack_type['kick'] = True
@@ -445,6 +463,10 @@ def keyPressed():
         game.player1.state['kick'] = True
         game.player1.state['idle'] = False
         
+        if game.player1.prev_action != 'kick':
+            game.player1.slice = 0
+            game.player1.prev_action = 'kick'
+        
     elif key == 'm' or key =='M':
         game.player1.attacking = True
         game.player1.attack_type['special_move'] = True
@@ -452,6 +474,10 @@ def keyPressed():
         # Setting the player's state to main and canceling idle
         game.player1.state['main'] = True
         game.player1.state['idle'] = False
+        
+        if game.player1.prev_action != 'main':
+            game.player1.slice = 0
+            game.player1.prev_action = 'main'
         
         
         
@@ -464,6 +490,10 @@ def keyPressed():
         # Setting the player's state to run and canceling idle
         game.player2.state['run'] = True
         game.player2.state['idle'] = False
+        
+        if game.player2.prev_action != 'left':
+            game.player2.slice = 0
+            game.player2.prev_action = 'left'
     elif key == 'd' or key == 'D':
         game.player2.keyLog['Right'] = True
         game.player2.p_direction = 'right'
@@ -471,6 +501,10 @@ def keyPressed():
         # Setting the player's state to run and canceling idle
         game.player2.state['run'] = True
         game.player2.state['idle'] = False
+        
+        if game.player2.prev_action != 'right':
+            game.player2.slice = 0
+            game.player2.prev_action = 'right'
     elif key == 'w' or key == 'W':
         game.player2.keyLog['Up'] = True
         
@@ -486,6 +520,10 @@ def keyPressed():
         game.player2.state['punch'] = True
         game.player2.state['idle'] = False
         
+        if game.player2.prev_action != 'punch':
+            game.player2.slice = 0
+            game.player2.prev_action = 'punch'
+        
     elif key == 'q' or key =='Q':
         game.player2.attacking = True
         game.player2.attack_type['kick'] = True
@@ -494,6 +532,10 @@ def keyPressed():
         game.player2.state['kick'] = True
         game.player2.state['idle'] = False
         
+        if game.player2.prev_action != 'kick':
+            game.player2.slice = 0
+            game.player2.prev_action = 'kick'
+        
     elif key == 'x' or key =='X':
         game.player2.attacking = True
         game.player2.attack_type['special_move'] = True
@@ -501,6 +543,10 @@ def keyPressed():
         # Setting the player's state to run and canceling idle
         game.player2.state['main'] = True
         game.player2.state['idle'] = False
+        
+        if game.player2.prev_action != 'main':
+            game.player2.slice = 0
+            game.player2.prev_action = 'main'
         
         
     
